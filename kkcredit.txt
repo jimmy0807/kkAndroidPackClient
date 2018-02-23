@@ -1,0 +1,15 @@
+android
+
+Password:weixin_kkcredit
+Confirm:weixin_kkcredit
+
+Alias:appKkcredit
+Password:weixin_kkcredit
+Confirm:weixin_kkcredit
+Validity(years):25
+First and Last Name:Vcredit App
+Organizational Unit:维视投资咨询上海有限公司
+Organization:维信理财
+City or Locality:上海
+State or Province:上海
+Country Code(XX):CN

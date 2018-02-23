@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -17,12 +18,44 @@ type Manager struct {
 var instance *Manager
 var once sync.Once
 
+func packagexxx(i int) {
+
+	fmt.Println(i)
+
+	s := "jarsigner -digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar app-base-release_340_9_Leshi_" + strconv.Itoa(i) + ".apk app-base-release_340_9_Leshi.apk appKkcredit"
+	cmd := exec.Command("/bin/sh", "-c", s)
+	cmd.Output()
+
+	fmt.Println("finsih")
+
+}
+
 //Instance 获取对象
 func Instance() *Manager {
+	// i := 0
+	// for {
+	// 	if i < 1 {
+	// 		go packagexxx(i)
+	// 		i = i + 1
+	// 	}
+
+	// }
+
 	once.Do(func() {
 		instance = &Manager{}
+		// f1, err := os.Open("./JavaEnv")
+		// if err != nil {
+		// }
 
-		go startTimer()
+		// var files = []*os.File{f1}
+		// dest := "test.zip"
+		// err = zip.Zip(files, dest)
+
+		// zip.Unzip("./test.zip", ".")
+		// fmt.Println("结束")
+		//go startTimer()
+
+		ensureJavaEnv()
 	})
 	return instance
 }

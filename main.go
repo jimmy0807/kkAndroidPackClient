@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"kkAndroidPackClient/config"
-	httpServer "kkAndroidPackClient/http"
 	"kkAndroidPackClient/packManager"
 	"log"
 	"os"
@@ -14,6 +12,7 @@ import (
 
 func main() {
 	packManager.Instance()
+
 	var stopLock sync.Mutex
 	stop := false
 	stopChan := make(chan struct{}, 1)
@@ -31,7 +30,6 @@ func main() {
 	}()
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	handler := httpServer.HandleHTTPServer("/")
-	url := config.HttpHost + ":" + config.HttpPort
-	httpServer.Start(url, handler)
+	//request.PostFile("app-base-release_340_9_Leshi.apk", ServerHost+"uploadApkFile")
+	select {}
 }
