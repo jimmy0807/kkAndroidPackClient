@@ -100,8 +100,8 @@ func unzipTargz(tarFile, dest string) error {
 			}
 		}
 		filename := dest + hdr.Name
-		fmt.Println(filename)
-		file, err := createFile(filename)
+
+		file, err := createFile(filename, os.FileMode(hdr.Mode))
 		if err != nil {
 			return err
 		}
@@ -111,21 +111,46 @@ func unzipTargz(tarFile, dest string) error {
 }
 
 func unzipRar(zipFile, dest string) error {
-	dest = dest + string([]rune(zipFile)[0:strings.LastIndex(zipFile, ".")]) + "/"
+	rootFileName := string([]rune(zipFile)[0:strings.LastIndex(zipFile, ".")])
 	reader, err := zip.OpenReader(zipFile)
 	if err != nil {
 		return err
 	}
 	defer reader.Close()
+
+	isFirstFile := true
 	for _, file := range reader.File {
 		rc, err := file.Open()
 		if err != nil {
 			return err
 		}
+
+		if len(file.Name) > 8 {
+			s := string([]rune(file.Name)[0:8])
+			fmt.Println(s)
+			if s == "__MACOSX" {
+				continue
+			}
+		}
 		defer rc.Close()
+		if isFirstFile {
+			isFirstFile = false
+			if rootFileName+"/" == file.Name {
+				continue
+			}
+
+			dest = dest + string([]rune(zipFile)[0:strings.LastIndex(zipFile, ".")]) + "/"
+		}
 		filename := dest + file.Name
 
-		w, err := createFile(filename)
+		if file.FileInfo().IsDir() {
+			fmt.Println(filename)
+			os.MkdirAll(filename, file.Mode())
+			continue
+		}
+
+		w, err := createFile(filename, file.Mode())
+
 		if err != nil {
 			return err
 		}
@@ -159,12 +184,11 @@ func subString(str string, start, end int) string {
 	return string(rs[start:end])
 }
 
-func createFile(name string) (*os.File, error) {
-	t := string([]rune(name)[0:strings.LastIndex(name, "/")])
-	fmt.Println(t)
+func createFile(name string, mode os.FileMode) (*os.File, error) {
 	err := os.MkdirAll(string([]rune(name)[0:strings.LastIndex(name, "/")]), 0755)
 	if err != nil {
 		return nil, err
 	}
-	return os.Create(name)
+
+	return os.OpenFile(name, os.O_WRONLY|os.O_CREATE, mode)
 }

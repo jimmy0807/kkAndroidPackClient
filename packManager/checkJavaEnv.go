@@ -8,6 +8,7 @@ import (
 )
 
 func ensureJavaEnv() {
+
 	if !javaEnvExist() {
 		request.DownloadJavaEnv("http://localhost:7878/files/JavaEnv.zip")
 
@@ -27,7 +28,12 @@ func javaEnvExist() bool {
 	for _, fi := range dir {
 		if !fi.IsDir() {
 			if fi.Name() == "JavaEnv.zip" {
-				zip.Unzip("JavaEnv.zip", "./")
+				err = zip.Unzip("JavaEnv.zip", "./")
+				if err != nil {
+					sh.ExecuteShell("rm -rf JavaEnv")
+					sh.ExecuteShell("rm -rf JavaEnv.zip")
+					return false
+				}
 				sh.ExecuteShell("rm -rf JavaEnv.zip")
 				return true
 			}
