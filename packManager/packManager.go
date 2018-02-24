@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mholt/archiver"
 )
 
 type Manager struct {
@@ -22,7 +24,8 @@ func packagexxx(i int) {
 
 	fmt.Println(i)
 
-	s := "jarsigner -digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar app-base-release_340_9_Leshi_" + strconv.Itoa(i) + ".apk app-base-release_340_9_Leshi.apk appKkcredit"
+	s := "jarsigner -digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar app-base-release_340_9_Leshi_" + strconv.Itoa(i) + ".apk test.zip appKkcredit"
+	fmt.Println(s)
 	cmd := exec.Command("/bin/sh", "-c", s)
 	cmd.Output()
 
@@ -43,7 +46,27 @@ func Instance() *Manager {
 
 	once.Do(func() {
 		instance = &Manager{}
-		// f1, err := os.Open("./JavaEnv")
+
+		//zip.CompressZip()
+		//packagexxx(90)
+
+		result := []string{}
+
+		dir, err := ioutil.ReadDir("./app-aiqiyim-release")
+
+		if err != nil {
+			return
+		}
+
+		for _, fi := range dir {
+			result = append(result, "./app-aiqiyim-release/"+fi.Name())
+		}
+
+		//archiver.Zip.Make("output.zip", []string{"./app-aiqiyim-release"})
+		fmt.Println(result)
+		archiver.Zip.Make("output.zip", result)
+
+		// f1, err := os.Open("./app-aiqiyim-release")
 		// if err != nil {
 		// }
 
@@ -51,11 +74,12 @@ func Instance() *Manager {
 		// dest := "test.zip"
 		// err = zip.Zip(files, dest)
 
-		// zip.Unzip("./test.zip", ".")
+		//zip.Unzip("app-aiqiyim-release.apk", "./")
+
 		// fmt.Println("结束")
 		//go startTimer()
 
-		ensureJavaEnv()
+		//ensureJavaEnv()
 	})
 	return instance
 }
