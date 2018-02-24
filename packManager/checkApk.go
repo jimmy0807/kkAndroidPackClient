@@ -26,7 +26,9 @@ func ensureApkIsValid(app bean.PackageApp) bool {
 }
 
 func checkApkIsVaild(app bean.PackageApp) bool {
-	b, err := ioutil.ReadFile("pack.info")
+	f, err := os.OpenFile("pack.info", os.O_RDWR|os.O_CREATE, 0644)
+
+	b, err := ioutil.ReadAll(f)
 	if err != nil {
 		fmt.Print(err)
 		return true
