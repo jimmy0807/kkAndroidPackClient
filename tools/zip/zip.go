@@ -127,7 +127,6 @@ func unzipRar(zipFile, dest string) error {
 
 		if len(file.Name) > 8 {
 			s := string([]rune(file.Name)[0:8])
-			fmt.Println(s)
 			if s == "__MACOSX" {
 				continue
 			}

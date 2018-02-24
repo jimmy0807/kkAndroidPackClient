@@ -1,24 +1,34 @@
 package request
 
 import (
-	"io"
+	"fmt"
+	"io/ioutil"
+	"kkAndroidPackClient/config"
+	"kkAndroidPackClient/db/bean"
 	"net/http"
-	"os"
 )
 
-func RequestPackTask(url string) {
-	res, err := http.Get(url)
+type PackageAppJSONResponse struct {
+	Code    int               `json:"code"`
+	Message string            `json:"message"`
+	App     []bean.PackageApp `json:"data,omitempty"`
+}
+
+func RequestPackTask() *PackageAppJSONResponse {
+	resp, err := http.Get(config.ServerHost + "fetchPackTask")
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
-	f, err := os.Create("JavaEnv.zip")
+	jsonResponse := new(PackageAppJSONResponse)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
-	_, err32 := io.Copy(f, res.Body)
-	if err32 != nil {
-		panic(err)
-	}
+	decodeJSONResponse(body, jsonResponse)
+	fmt.Println(jsonResponse.App[0].ApkName)
+	return jsonResponse
 }

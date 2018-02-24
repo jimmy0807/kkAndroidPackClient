@@ -2,14 +2,11 @@ package packManager
 
 import (
 	"fmt"
-	"io/ioutil"
+	"kkAndroidPackClient/http/request"
 	"os/exec"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
-
-	"github.com/mholt/archiver"
 )
 
 type Manager struct {
@@ -47,24 +44,30 @@ func Instance() *Manager {
 	once.Do(func() {
 		instance = &Manager{}
 
+		response := request.RequestPackTask()
+		if response != nil {
+			ensureApkIsValid(response.App[0])
+		}
+
 		//zip.CompressZip()
 		//packagexxx(90)
 
-		result := []string{}
+		// result := []string{}
 
-		dir, err := ioutil.ReadDir("./app-aiqiyim-release")
+		// dir, err := ioutil.ReadDir("./app-aiqiyim-release")
 
-		if err != nil {
-			return
-		}
+		// if err != nil {
+		// 	return
+		// }
 
-		for _, fi := range dir {
-			result = append(result, "./app-aiqiyim-release/"+fi.Name())
-		}
+		// for _, fi := range dir {
+		// 	result = append(result, "./app-aiqiyim-release/"+fi.Name())
+		// }
+
+		// fmt.Println(result)
+		// archiver.Zip.Make("output.zip", result)
 
 		//archiver.Zip.Make("output.zip", []string{"./app-aiqiyim-release"})
-		fmt.Println(result)
-		archiver.Zip.Make("output.zip", result)
 
 		// f1, err := os.Open("./app-aiqiyim-release")
 		// if err != nil {
@@ -98,61 +101,7 @@ func startTimer() {
 
 func dealPackage() {
 	for {
-		modifyTime := "1912 - 1920"
-		ensureApkIsValid(modifyTime)
+		//modifyTime := "1912 - 1920"
+		//ensureApkIsValid(modifyTime)
 	}
-}
-
-func ensureApkIsValid(modifyTime string) {
-	if !checkApkIsVaild(modifyTime) {
-		modifyApkModifyTime(modifyTime)
-		removeLocalApkAndDictionary()
-	}
-}
-
-func checkApkIsVaild(modifyTime string) bool {
-	b, err := ioutil.ReadFile("pack.info")
-	if err != nil {
-		fmt.Print(err)
-		return true
-	}
-
-	str := string(b)
-
-	if str == modifyTime {
-		return true
-	}
-
-	return false
-}
-
-func modifyApkModifyTime(modifyTime string) {
-	s := []byte(modifyTime)
-	ioutil.WriteFile("pack.info", s, 0644)
-}
-
-func removeLocalApkAndDictionary() {
-	dir, err := ioutil.ReadDir("./")
-
-	if err != nil {
-		return
-	}
-
-	apkName := ""
-
-	for _, fi := range dir {
-		if !fi.IsDir() {
-			if strings.HasSuffix(strings.ToLower(fi.Name()), "apk") {
-				apkName = fi.Name()
-			}
-		}
-	}
-
-	rmrf := "rm -rf " + apkName
-	cmd := exec.Command("/bin/sh", "-c", rmrf)
-	cmd.Output()
-
-	rmrfDir := "rm -rf " + strings.Split(apkName, ".")[0]
-	cmd = exec.Command("/bin/sh", "-c", rmrfDir)
-	cmd.Output()
 }
