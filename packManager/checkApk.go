@@ -2,6 +2,7 @@ package packManager
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"kkAndroidPackClient/db/bean"
 	"kkAndroidPackClient/http/request"
@@ -68,6 +69,13 @@ func apkExist(app bean.PackageApp) bool {
 					removeLocalApkAndDictionary(app)
 					return false
 				}
+
+				err := os.Remove(app.ApkName)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				copyAndroidManifest(app)
 				return true
 			}
 		}
@@ -93,8 +101,26 @@ func removeLocalApkAndDictionary(app bean.PackageApp) {
 	}
 
 	rmrfDir := strings.Split(app.ApkName, ".")[0]
-	err = os.Remove(rmrfDir)
+	err = os.RemoveAll(rmrfDir)
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func copyAndroidManifest(app bean.PackageApp) {
+	f, err := os.Create("AndroidManifest.xml")
+	if err != nil {
+		panic(err)
+	}
+
+	dir := strings.Split(app.ApkName, ".")[0]
+	src, err := os.Open(dir + "/" + "AndroidManifest.xml")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err32 := io.Copy(f, src)
+	if err32 != nil {
+		panic(err)
 	}
 }

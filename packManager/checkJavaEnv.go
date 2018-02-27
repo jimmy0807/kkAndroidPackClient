@@ -1,21 +1,26 @@
 package packManager
 
 import (
+	"fmt"
 	"io/ioutil"
 	"kkAndroidPackClient/http/request"
-	"kkAndroidPackClient/tools/sh"
 	"kkAndroidPackClient/tools/zip"
+	"os"
 )
 
-func ensureJavaEnv() {
+func ensureJavaEnv() bool {
 
 	if !javaEnvExist() {
-		request.DownloadJavaEnv("http://localhost:7878/files/JavaEnv.zip")
+		request.DownloadJavaEnv()
 
 		if !javaEnvExist() {
+
+			return false
 			//需要数据库插入日志记录了
 		}
 	}
+
+	return true
 }
 
 func javaEnvExist() bool {
@@ -30,11 +35,23 @@ func javaEnvExist() bool {
 			if fi.Name() == "JavaEnv.zip" {
 				err = zip.Unzip("JavaEnv.zip", "./")
 				if err != nil {
-					sh.ExecuteShell("rm -rf JavaEnv")
-					sh.ExecuteShell("rm -rf JavaEnv.zip")
+					err := os.RemoveAll("JavaEnv")
+					if err != nil {
+						fmt.Println(err)
+					}
+					err = os.Remove("JavaEnv.zip")
+					if err != nil {
+						fmt.Println(err)
+					}
+
 					return false
 				}
-				sh.ExecuteShell("rm -rf JavaEnv.zip")
+
+				err = os.Remove("JavaEnv.zip")
+				if err != nil {
+					fmt.Println(err)
+				}
+
 				return true
 			}
 		}

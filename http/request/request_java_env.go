@@ -2,11 +2,14 @@ package request
 
 import (
 	"io"
+	"kkAndroidPackClient/config"
 	"net/http"
 	"os"
 )
 
-func DownloadJavaEnv(url string) {
+func DownloadJavaEnv() {
+	url := config.ServerHost + "files/JavaEnv.zip"
+
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)

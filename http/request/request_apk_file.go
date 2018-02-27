@@ -11,7 +11,6 @@ import (
 
 func DownloadApkFile(app bean.PackageApp) bool {
 	url := config.ServerHost + "files/" + app.ApkName
-	fmt.Println(url)
 	res, err := http.Get(url)
 	if err != nil {
 		return false
