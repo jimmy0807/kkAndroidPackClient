@@ -75,7 +75,7 @@ func apkExist(app bean.PackageApp) bool {
 					fmt.Println(err)
 				}
 
-				copyAndroidManifest(app)
+				//copyAndroidManifest(app)
 				return true
 			}
 		}

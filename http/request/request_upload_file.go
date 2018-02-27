@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"kkAndroidPackClient/config"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 /*
@@ -17,11 +19,14 @@ func main() {
     postFile(filename, target_url)
 }
 */
-func PostFile(filename string, targetUrl string) error {
+func PostFile(filename string, channelID int64) error {
+	targetUrl := config.ServerHost + "uploadApkFile"
+
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
 
 	bodyWriter.WriteField("fileName", filename)
+	bodyWriter.WriteField("channelID", strconv.FormatInt(channelID, 10))
 
 	//关键的一步操作
 	fileWriter, err := bodyWriter.CreateFormFile("uploadFile", filename)

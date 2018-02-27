@@ -24,6 +24,7 @@ type Manager struct {
 
 var instance *Manager
 var once sync.Once
+var timer *time.Ticker
 
 func packagexxx(i int) {
 
@@ -40,28 +41,8 @@ func packagexxx(i int) {
 
 //Instance 获取对象
 func Instance() *Manager {
-	// i := 0
-	// for {
-	// 	if i < 1 {
-	// 		go packagexxx(i)
-	// 		i = i + 1
-	// 	}
-
-	// }
-
 	once.Do(func() {
 		instance = &Manager{}
-
-		if ensureJavaEnv() {
-			response := request.RequestPackTask()
-			if response != nil {
-				if ensureApkIsValid(response.App[0]) {
-
-				}
-
-				pack(response.App[0])
-			}
-		}
 
 		//zip.CompressZip()
 		//packagexxx(90)
@@ -97,33 +78,71 @@ func Instance() *Manager {
 		//go startTimer()
 
 		//ensureJavaEnv()
+
+		if !dealPackage() {
+			startTimer()
+		} else {
+			dealPackage()
+		}
 	})
 	return instance
 }
 
 func startTimer() {
-	timer := time.NewTicker(60 * time.Second)
+	fmt.Println("startTimer")
+	timer = time.NewTicker(60 * time.Second)
 	for {
 		select {
 		case <-timer.C:
-			dealPackage()
+			stopTimer()
+			if !dealPackage() {
+				startTimer()
+			} else {
+				dealPackage()
+			}
+		}
+	}
+}
+
+func stopTimer() {
+	if timer != nil {
+		fmt.Println("stopTimer")
+		timer.Stop()
+		timer = nil
+	}
+}
+
+func dealPackage() bool {
+	fmt.Println("开始打包")
+	stopTimer()
+	if ensureJavaEnv() {
+		response := request.RequestPackTask()
+		if response != nil {
+			if len(response.App) == 1 {
+				if ensureApkIsValid(response.App[0]) {
+					return pack(response.App[0])
+				}
+			}
 		}
 	}
 
-	dealPackage()
+	return false
 }
 
-func dealPackage() {
-
-}
-
-func pack(app bean.PackageApp) {
-	//modifyAndroidManifest(app)
-	//moveAndroidManifest(app)
+func pack(app bean.PackageApp) bool {
 	removeMETAINF(app)
 	renameChannel(app)
 	doZip(app)
 	doPack(app)
+	if checkApkIsVaildFromShell(app) {
+		filename := "app-" + app.ChannelName + "-release.apk"
+		if request.PostFile(filename, app.ChannelID) == nil {
+			removeApk(app)
+			return true
+		}
+	}
+
+	return false
 }
 
 func removeMETAINF(app bean.PackageApp) {
@@ -203,4 +222,24 @@ func doPack(app bean.PackageApp) {
 	s := "./JavaEnv/bin/jarsigner -digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar " + targtApk + " " + targtZip + " appKkcredit"
 	sh.ExecuteShell(s)
 	fmt.Println(s)
+}
+
+func checkApkIsVaildFromShell(app bean.PackageApp) bool {
+	targtApk := "app-" + app.ChannelName + "-release.apk"
+	s := "./JavaEnv/bin/jarsigner -verify " + targtApk
+	result := sh.ExecuteShellWithResultString(s)
+	fmt.Println(result)
+	if strings.Contains(result, "jar 已验证") {
+		return true
+	}
+
+	return false
+}
+
+func removeApk(app bean.PackageApp) {
+	targtApk := "app-" + app.ChannelName + "-release.apk"
+	err := os.Remove(targtApk)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

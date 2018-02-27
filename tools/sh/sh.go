@@ -1,6 +1,7 @@
 package sh
 
 import (
+	"fmt"
 	"os/exec"
 )
 
@@ -21,5 +22,6 @@ func ExecuteShellWithResultString(command string) string {
 		return string(bytes)
 	}
 
+	fmt.Println(err)
 	return ""
 }
