@@ -12,16 +12,16 @@ func DownloadJavaEnv() {
 
 	res, err := http.Get(url)
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	f, err := os.Create("JavaEnv.zip")
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	_, err32 := io.Copy(f, res.Body)
 	if err32 != nil {
-		panic(err)
+		return
 	}
 }
