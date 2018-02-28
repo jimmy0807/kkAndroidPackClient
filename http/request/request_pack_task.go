@@ -6,6 +6,7 @@ import (
 	"kkAndroidPackClient/config"
 	"kkAndroidPackClient/db/bean"
 	"net/http"
+	"os"
 )
 
 type PackageAppJSONResponse struct {
@@ -15,7 +16,14 @@ type PackageAppJSONResponse struct {
 }
 
 func RequestPackTask() *PackageAppJSONResponse {
-	resp, err := http.Get(config.ServerHost + "fetchPackTask")
+	host, err := os.Hostname()
+	if err != nil {
+		fmt.Printf("%s", err)
+	} else {
+		fmt.Printf("%s", host)
+	}
+
+	resp, err := http.Get(config.ServerHost + "fetchPackTask?hostName=" + host)
 	if err != nil {
 		return nil
 	}
@@ -29,6 +37,6 @@ func RequestPackTask() *PackageAppJSONResponse {
 	}
 
 	decodeJSONResponse(body, jsonResponse)
-	fmt.Println(jsonResponse.App[0].ApkName)
+	//fmt.Println(jsonResponse.App[0].ApkName)
 	return jsonResponse
 }

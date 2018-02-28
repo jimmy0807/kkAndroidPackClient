@@ -22,11 +22,19 @@ func main() {
 func PostFile(filename string, channelID int64) error {
 	targetUrl := config.ServerHost + "uploadApkFile"
 
+	host, err := os.Hostname()
+	if err != nil {
+		fmt.Printf("%s", err)
+	} else {
+		fmt.Printf("%s", host)
+	}
+
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
 
 	bodyWriter.WriteField("fileName", filename)
 	bodyWriter.WriteField("channelID", strconv.FormatInt(channelID, 10))
+	bodyWriter.WriteField("hostName", host)
 
 	//关键的一步操作
 	fileWriter, err := bodyWriter.CreateFormFile("uploadFile", filename)

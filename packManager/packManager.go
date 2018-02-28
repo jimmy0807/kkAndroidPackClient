@@ -79,11 +79,7 @@ func Instance() *Manager {
 
 		//ensureJavaEnv()
 
-		if !dealPackage() {
-			startTimer()
-		} else {
-			dealPackage()
-		}
+		runloop()
 	})
 	return instance
 }
@@ -94,12 +90,7 @@ func startTimer() {
 	for {
 		select {
 		case <-timer.C:
-			stopTimer()
-			if !dealPackage() {
-				startTimer()
-			} else {
-				dealPackage()
-			}
+			runloop()
 		}
 	}
 }
@@ -109,6 +100,14 @@ func stopTimer() {
 		fmt.Println("stopTimer")
 		timer.Stop()
 		timer = nil
+	}
+}
+
+func runloop() {
+	if !dealPackage() {
+		startTimer()
+	} else {
+		runloop()
 	}
 }
 
