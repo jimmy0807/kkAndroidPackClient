@@ -9,11 +9,13 @@ import (
 	"kkAndroidPackClient/tools/sh"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/axgle/mahonia"
 	"github.com/mholt/archiver"
 )
 
@@ -115,7 +117,9 @@ func dealPackage() bool {
 	fmt.Println("开始打包")
 	stopTimer()
 	if ensureJavaEnv() {
+		fmt.Println("ensureJavaEnv")
 		response := request.RequestPackTask()
+		fmt.Println("response")
 		if response != nil {
 			if len(response.App) == 1 {
 				if ensureApkIsValid(response.App[0]) {
@@ -216,18 +220,54 @@ func doZip(app bean.PackageApp) {
 }
 
 func doPack(app bean.PackageApp) {
+	fmt.Println("dopack start")
+	fileName := ""
+
 	targtZip := "app-" + app.ChannelName + "-release.zip"
 	targtApk := "app-" + app.ChannelName + "-release.apk"
-	s := "./JavaEnv/bin/jarsigner -digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar " + targtApk + " " + targtZip + " appKkcredit"
+
+	s := ""
+
+	if runtime.GOOS == "windows" {
+		fileName = "cd JavaEnvWindows/bin/ && jarsigner.exe "
+		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore ../../kkcredit.jks -storepass weixin_kkcredit -signedjar " + "../../" + targtApk + " " + "../../" + targtZip + " appKkcredit"
+	} else {
+		fileName = "./JavaEnv/bin/jarsigner "
+		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar " + targtApk + " " + targtZip + " appKkcredit"
+	}
+
 	sh.ExecuteShell(s)
-	fmt.Println(s)
+
+	//cmd := exec.Command("cmd", "/C", s)
+	//cmd.Output()
+
+	//fmt.Println(s)
 }
 
 func checkApkIsVaildFromShell(app bean.PackageApp) bool {
+	fmt.Println("将要验证3我1")
+
 	targtApk := "app-" + app.ChannelName + "-release.apk"
-	s := "./JavaEnv/bin/jarsigner -verify " + targtApk
+	s := ""
+	if runtime.GOOS == "windows" {
+		s = "cd JavaEnvWindows/bin/ && jarsigner.exe -verify " + "../../" + targtApk
+	} else {
+		s = "./JavaEnv/bin/jarsigner -verify " + targtApk
+	}
+
+	fmt.Println("将要验证22221")
 	result := sh.ExecuteShellWithResultString(s)
+	fmt.Println("将要验证231")
+
+	fmt.Println("将要验证1")
+	if runtime.GOOS == "windows" {
+		dec := mahonia.NewDecoder("gbk")
+		result = dec.ConvertString(result)
+	}
+
+	fmt.Println("将要验证2")
 	fmt.Println(result)
+	fmt.Println("将要验证3")
 	if strings.Contains(result, "jar 已验证") {
 		return true
 	}
@@ -238,6 +278,12 @@ func checkApkIsVaildFromShell(app bean.PackageApp) bool {
 func removeApk(app bean.PackageApp) {
 	targtApk := "app-" + app.ChannelName + "-release.apk"
 	err := os.Remove(targtApk)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	targtZip := "app-" + app.ChannelName + "-release.zip"
+	err = os.Remove(targtZip)
 	if err != nil {
 		fmt.Println(err)
 	}
