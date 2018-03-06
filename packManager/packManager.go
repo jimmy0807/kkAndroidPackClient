@@ -230,10 +230,10 @@ func doPack(app bean.PackageApp) {
 
 	if runtime.GOOS == "windows" {
 		fileName = "cd JavaEnvWindows/bin/ && jarsigner.exe "
-		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore ../../kkcredit.jks -storepass weixin_kkcredit -signedjar " + "../../" + targtApk + " " + "../../" + targtZip + " appKkcredit"
+		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar " + "../../" + targtApk + " " + "../../" + targtZip + " appKkcredit"
 	} else {
 		fileName = "./JavaEnv/bin/jarsigner "
-		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore kkcredit.jks -storepass weixin_kkcredit -signedjar " + targtApk + " " + targtZip + " appKkcredit"
+		s = fileName + "-digestalg SHA1 -sigalg MD5withRSA -keystore ./JavaEnv/bin/kkcredit.jks -storepass weixin_kkcredit -signedjar " + targtApk + " " + targtZip + " appKkcredit"
 	}
 
 	sh.ExecuteShell(s)
