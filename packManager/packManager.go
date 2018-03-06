@@ -87,7 +87,7 @@ func Instance() *Manager {
 }
 
 func startTimer() {
-	fmt.Println("startTimer")
+	fmt.Println("启动定时器")
 	timer = time.NewTicker(60 * time.Second)
 	for {
 		select {
@@ -117,9 +117,9 @@ func dealPackage() bool {
 	fmt.Println("开始打包")
 	stopTimer()
 	if ensureJavaEnv() {
-		fmt.Println("ensureJavaEnv")
+		fmt.Println("Java环境已经下载")
 		response := request.RequestPackTask()
-		fmt.Println("response")
+		fmt.Println("打包数据已经返回")
 		if response != nil {
 			if len(response.App) == 1 {
 				if ensureApkIsValid(response.App[0]) {
@@ -237,16 +237,9 @@ func doPack(app bean.PackageApp) {
 	}
 
 	sh.ExecuteShell(s)
-
-	//cmd := exec.Command("cmd", "/C", s)
-	//cmd.Output()
-
-	//fmt.Println(s)
 }
 
 func checkApkIsVaildFromShell(app bean.PackageApp) bool {
-	fmt.Println("将要验证3我1")
-
 	targtApk := "app-" + app.ChannelName + "-release.apk"
 	s := ""
 	if runtime.GOOS == "windows" {
@@ -255,19 +248,16 @@ func checkApkIsVaildFromShell(app bean.PackageApp) bool {
 		s = "./JavaEnv/bin/jarsigner -verify " + targtApk
 	}
 
-	fmt.Println("将要验证22221")
+	fmt.Println("将要验证APK")
 	result := sh.ExecuteShellWithResultString(s)
-	fmt.Println("将要验证231")
+	fmt.Println("验证结束")
 
-	fmt.Println("将要验证1")
 	if runtime.GOOS == "windows" {
 		dec := mahonia.NewDecoder("gbk")
 		result = dec.ConvertString(result)
 	}
 
-	fmt.Println("将要验证2")
 	fmt.Println(result)
-	fmt.Println("将要验证3")
 	if strings.Contains(result, "jar 已验证") {
 		return true
 	}
